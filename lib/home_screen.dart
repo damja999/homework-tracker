@@ -5,11 +5,35 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.grey[150], // Custom home screen background
+      appBar: AppBar(
+        title: const Text('Homework Tracker'),
+      ),
       body: Center(
-        child: Text(
-          'Welcome to Homework Tracker',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome to Homework Tracker!',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Ready to add assignments!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: const Text('Get Started'),
+            ),
+          ],
         ),
       ),
     );
