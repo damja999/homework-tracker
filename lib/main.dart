@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
 
+import 'dart:async'; //
+
+import 'package:flutter/material.dart'; //
+
+import 'main_navigation.dart';
+
 void main() {
   runApp(const HomeworkTrackerApp());
 }
@@ -35,19 +41,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // This routes to your new nav screen instead of the old home screen
     Timer(const Duration(seconds: 3), () {
-      Navigator.of(
-        context,
-      ).pushReplacement(
+      Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
+          builder: (_) => const MainNavigationScreen(),
         ),
       );
-
-      
     });
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
