@@ -1,14 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
-import 'home_screen.dart';
-
-import 'dart:async'; //
-
-import 'package:flutter/material.dart'; //
-
-import 'main_navigation.dart';
+import 'views/main_navigation.dart';
 
 void main() {
   runApp(const HomeworkTrackerApp());
@@ -25,7 +17,7 @@ class HomeworkTrackerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: const MainNavigationScreen(),
     );
   }
 }
@@ -39,18 +31,20 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-  void initState() {
-    super.initState();
-    // This routes to your new nav screen instead of the old home screen
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const MainNavigationScreen(),
-        ),
-      );
-    });
-  }
-  
+void initState() {
+  super.initState();
+
+  Future.delayed(const Duration(seconds: 3), () {
+    if (!mounted) return;
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const MainNavigationScreen(),
+      ),
+    );
+  });
+}
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
@@ -59,7 +53,6 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Text(
           'Homework Tracker',
           style: TextStyle(
-          
             color: Colors.white,
             fontSize: 28,
             fontWeight: FontWeight.bold,
