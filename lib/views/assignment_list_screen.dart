@@ -5,11 +5,33 @@ class AssignmentListScreen extends StatefulWidget {
   const AssignmentListScreen({super.key});
 
   @override
-  State<AssignmentListScreen> createState() => _AssignmentListScreenState();
+  State<AssignmentListScreen> createState() =>
+      _AssignmentListScreenState();
 }
 
-class _AssignmentListScreenState extends State<AssignmentListScreen> {
-  final AssignmentPresenter _presenter = AssignmentPresenter();
+class _AssignmentListScreenState
+    extends State<AssignmentListScreen> {
+  final AssignmentPresenter _presenter =
+      AssignmentPresenter();
+
+  bool _isLoading = true;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAssignments();
+  }
+
+  Future<void> _loadAssignments() async {
+    await _presenter.loadAssignments();
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   Future<void> _showAddAssignmentDialog() async {
     String title = '';
@@ -23,20 +45,28 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
           decoration: const InputDecoration(
             labelText: 'Title',
           ),
-          onChanged: (value) => title = value,
+          onChanged: (value) {
+            title = value;
+          },
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+            },
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               if (title.trim().isEmpty) return;
 
-              setState(() {
-                _presenter.addAssignment(title.trim());
-              });
+              await _presenter.addAssignment(
+                title.trim(),
+              );
+
+              if (!mounted) return;
+
+              setState(() {});
 
               Navigator.pop(dialogContext);
             },
@@ -51,70 +81,113 @@ class _AssignmentListScreenState extends State<AssignmentListScreen> {
   Widget build(BuildContext context) {
     final assignments = _presenter.assignments;
 
+    final filteredAssignments = assignments.where((assignment) {
+      return assignment.title
+          .toLowerCase()
+          .contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Assignments'),
-        actions: [
-          if (assignments.isNotEmpty)
-            IconButton(
-              tooltip: 'Delete all assignments',
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () {
-                setState(() {
-                  _presenter.deleteAll();
-                });
-              },
-            ),
-        ],
       ),
 
-      body: assignments.isEmpty
+      body: _isLoading
           ? const Center(
-              child: Text('No assignments yet'),
+              child: CircularProgressIndicator(),
             )
           : Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      '${_presenter.completedCount} of '
-                      '${assignments.length} completed',
-                      style: Theme.of(context).textTheme.titleMedium,
+                  padding: const EdgeInsets.all(12),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      labelText: 'Search assignments',
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(),
                     ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                    },
                   ),
                 ),
 
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: assignments.length,
-                    itemBuilder: (context, index) {
-                      final assignment = assignments[index];
-
-                      return CheckboxListTile(
-                        title: Text(
-                          assignment.title,
-                          style: TextStyle(
-                            decoration: assignment.isCompleted
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                        ),
-                        value: assignment.isCompleted,
-                        onChanged: (_) {
-                          setState(() {
-                            _presenter.toggleCompleted(index);
-                          });
-                        },
-                      );
-                    },
+                if (assignments.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      16,
+                      0,
+                      16,
+                      8,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${_presenter.completedCount} of '
+                        '${assignments.length} completed',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium,
+                      ),
+                    ),
                   ),
+
+                Expanded(
+                  child: filteredAssignments.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No matching assignments',
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount:
+                              filteredAssignments.length,
+                          itemBuilder:
+                              (context, index) {
+                            final assignment =
+                                filteredAssignments[index];
+
+                            final originalIndex =
+                                assignments.indexOf(
+                              assignment,
+                            );
+
+                            return CheckboxListTile(
+                              title: Text(
+                                assignment.title,
+                                style: TextStyle(
+                                  decoration:
+                                      assignment
+                                              .isCompleted
+                                          ? TextDecoration
+                                              .lineThrough
+                                          : TextDecoration
+                                              .none,
+                                ),
+                              ),
+                              value: assignment
+                                  .isCompleted,
+                              onChanged: (_) async {
+                                await _presenter
+                                    .toggleCompleted(
+                                  originalIndex,
+                                );
+
+                                if (!mounted) return;
+
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
 
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:
+          FloatingActionButton(
         tooltip: 'Add assignment',
         onPressed: _showAddAssignmentDialog,
         child: const Icon(Icons.add),
