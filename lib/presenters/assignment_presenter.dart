@@ -1,3 +1,4 @@
+
 import '../models/assignment_model.dart';
 
 class AssignmentPresenter {
@@ -18,21 +19,38 @@ class AssignmentPresenter {
       ..addAll(fetched);
   }
 
-  Future<void> addAssignment(String title) async {
-    await Assignment.addAssignment(title);
+  Future<void> addAssignment(
+    String title,
+    String courseName,
+  ) async {
+    final id = await Assignment.addAssignment(
+      title,
+      courseName,
+    );
 
     _assignments.add(
-      Assignment(title: title),
+      Assignment(
+        id: id,
+        title: title,
+        courseName: courseName,
+      ),
     );
   }
 
   Future<void> toggleCompleted(int index) async {
+    if (index < 0 || index >= _assignments.length) {
+      return;
+    }
+
+    final assignment = _assignments[index];
+
+    final newStatus = !assignment.isCompleted;
+
     await Assignment.updateCompletionStatus(
-      index,
-      _assignments,
+      assignment.id,
+      newStatus,
     );
 
-    _assignments[index].isCompleted =
-        !_assignments[index].isCompleted;
+    assignment.isCompleted = newStatus;
   }
 }

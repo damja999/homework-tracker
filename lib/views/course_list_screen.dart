@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../presenters/course_presenter.dart';
-
+import '../widgets/add_fab.dart';
 class CourseListScreen extends StatefulWidget {
   const CourseListScreen({super.key});
 
@@ -82,7 +82,7 @@ class _CourseListScreenState
                   description,
                 );
 
-                if (!mounted) return;
+                if (!mounted || !dialogContext.mounted) return;
 
                 setState(() {});
 
@@ -180,11 +180,8 @@ class _CourseListScreenState
               ],
             ),
 
-      floatingActionButton:
-          FloatingActionButton(
-        tooltip: 'Add course',
-        onPressed: _showAddCourseDialog,
-        child: const Icon(Icons.add),
+      floatingActionButton: AddFAB(
+  onPressed: _showAddCourseDialog,
       ),
     );
   }
