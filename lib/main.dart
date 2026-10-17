@@ -6,9 +6,7 @@ import 'views/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp();
-
   runApp(const HomeworkTrackerApp());
 }
 
@@ -20,7 +18,15 @@ class HomeworkTrackerApp extends StatelessWidget {
     return MaterialApp(
       title: 'Homework Tracker',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: const Color(0xFFF7F5FC),
+        appBarTheme: const AppBarTheme(centerTitle: true),
+        cardTheme: CardThemeData(
+          elevation: 1,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
       ),
       home: const SplashScreen(),
     );
@@ -37,26 +43,16 @@ class SplashScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Colors.blue,
+            backgroundColor: Colors.deepPurple,
             body: Center(
               child: Text(
                 'Homework Tracker',
-                style: TextStyle(
-                  fontSize: 28,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           );
         }
-
-        // If user is signed in
-        if (snapshot.hasData) {
-          return const MainNavigationScreen();
-        }
-
-        // If user is not signed in
+        if (snapshot.hasData) return const MainNavigationScreen();
         return const LoginScreen();
       },
     );
